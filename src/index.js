@@ -3,11 +3,16 @@ import blessed from 'blessed';
 import contrib from 'blessed-contrib';
 import chalk from 'chalk';
 import { readFileSync } from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { DataService } from './dataService.js';
 
 class StonksDashboard {
   constructor() {
-    this.config = JSON.parse(readFileSync('./config.json', 'utf-8'));
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const CONFIG_PATH = path.resolve(__dirname, '../config.json');
+    this.config = JSON.parse(readFileSync(CONFIG_PATH, 'utf-8'));
     this.dataService = new DataService();
     this.assetsData = [];
     this.prevAssetsData = [];

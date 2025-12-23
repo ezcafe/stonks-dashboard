@@ -1,12 +1,17 @@
 import axios from 'axios';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Global rate limiter for CoinGecko - sequential with delay
 let lastCoinGeckoCall = 0;
 const COINGECKO_DELAY = 5000; // 5 seconds between calls to avoid 429
 
 // File cache settings
-const CACHE_FILE = './cache.json';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const ROOT_DIR = path.resolve(__dirname, '..');
+const CACHE_FILE = path.join(ROOT_DIR, 'cache.json');
 const CACHE_TTL = 60 * 1000; // 1 minute cache validity
 const DETAIL_TTL = 30 * 60 * 1000; // 30 minutes for crypto detail
 
@@ -52,17 +57,6 @@ export class DataService {
           this.cache.set(key, value);
         }
         console.log(`[Cache] Loaded ${Object.keys(data).length} entries from file`);
-      } else if (existsSync('./cache.example.json')) {
-        // Seed cache from example on first run
-        const example = readFileSync('./cache.example.json', 'utf-8');
-        writeFileSync(CACHE_FILE, example);
-        const data = JSON.parse(example);
-        for (const [key, value] of Object.entries(data)) {
-          // If example entries have timestamps, refresh them
-          if (value && typeof value === 'object') value.timestamp = Date.now();
-          this.cache.set(key, value);
-        }
-        console.log('[Cache] Seeded cache.json from cache.example.json');
       }
     } catch (error) {
       console.error('[Cache] Error loading cache file:', error.message);
